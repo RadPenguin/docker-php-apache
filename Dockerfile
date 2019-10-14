@@ -66,5 +66,14 @@ RUN a2enmod \
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
+# Modifty Apache to run our script before startup
+RUN apt-get -qq update && \
+  apt-get install -yqq iproute2
+ADD ./startup.sh /usr/local/bin/startup.sh
+RUN cat /usr/local/bin/apache2-foreground | \
+  sed -e 's/^\(exec .*\)$/\/usr\/local\/bin\/startup.sh\n\n\1/' > /tmp/apache2-foreground && \
+  chmod 755 /tmp/apache2-foreground && \
+  mv /tmp/apache2-foreground /usr/local/bin/apache2-foreground
+
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
