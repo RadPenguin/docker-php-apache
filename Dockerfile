@@ -9,6 +9,8 @@ ENV LANG en_US.UTF-8
 ENV LC_ALL C.UTF-8
 ENV LANGUAGE en_US.UTF-8
 ENV COMPOSER_ALLOW_SUPERUSER=1
+# https://pecl.php.net/package/imagick
+ENV IMAGEMAGICK_VERSION=3.4.3
 
 # Install dependencies.
 RUN apt-get update -qq && \
