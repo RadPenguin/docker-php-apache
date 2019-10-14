@@ -4,13 +4,14 @@ ARG BUILD_DATE
 ARG VERSION
 LABEL build_version="RadPenguin version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 
-ENV TZ="America/Edmonton"
-ENV LANG en_US.UTF-8
-ENV LC_ALL C.UTF-8
-ENV LANGUAGE en_US.UTF-8
+ENV APACHE_DOCUMENT_ROOT /var/www/html
 ENV COMPOSER_ALLOW_SUPERUSER=1
 # https://pecl.php.net/package/imagick
 ENV IMAGEMAGICK_VERSION=3.4.3
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+ENV LC_ALL C.UTF-8
+ENV TZ="America/Edmonton"
 
 # Install dependencies.
 RUN apt-get update -qq && \
@@ -55,6 +56,10 @@ RUN a2enmod \
     headers \
     macro \
     rewrite
+
+# Set the Apache path
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

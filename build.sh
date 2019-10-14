@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set-e -u
+set -e -u
 
 REPO_NAME=radpenguin/php-apache
 BUILD_DATE=$( date +"%Y-%m-%d-%H-%M-%S" )
