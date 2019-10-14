@@ -28,7 +28,12 @@ RUN apt-get update -qq && \
     libzip-dev && \
  docker-php-ext-install -j$(nproc) \
     mysqli \
-    zip
+    zip && \
+  pecl install xdebug && \
+  docker-php-ext-enable xdebug
+
+RUN mv /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
+ADD ./php.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Install ImageMagick
 RUN apt-get update && apt-get install -y --no-install-recommends libmagickwand-dev imagemagick && \
