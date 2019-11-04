@@ -57,6 +57,8 @@ RUN usermod -g 1000 www-data
 # Enable apache modules
 RUN a2enmod \
     actions \
+    bcmath \
+    exif \
     expires\
     headers \
     macro \
