@@ -27,6 +27,8 @@ RUN apt-get update -qq && \
   apt-get -yqq install \
     libzip-dev && \
  docker-php-ext-install -j$(nproc) \
+    bcmath \
+    exif \
     mysqli \
     zip && \
   pecl install xdebug && \
@@ -57,8 +59,6 @@ RUN usermod -g 1000 www-data
 # Enable apache modules
 RUN a2enmod \
     actions \
-    bcmath \
-    exif \
     expires\
     headers \
     macro \
