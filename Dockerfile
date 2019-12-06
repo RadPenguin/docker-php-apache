@@ -4,20 +4,21 @@ ARG BUILD_DATE
 ARG VERSION
 LABEL build_version="RadPenguin version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 
-ENV APACHE_DOCUMENT_ROOT /var/www/html
-ENV COMPOSER_ALLOW_SUPERUSER=1
-# https://pecl.php.net/package/imagick
-ENV IMAGEMAGICK_VERSION=3.4.3
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL C.UTF-8
 ENV TZ="America/Edmonton"
 
+ENV APACHE_DOCUMENT_ROOT /var/www/html
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV IMAGEMAGICK_VERSION=3.4.3
+
 # Install dependencies.
 RUN apt-get update -qq && \
   apt-get install -yqq \
     curl \
-    git
+    git \
+    unzip
 
 # Set the timezone                    
 RUN ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
@@ -44,8 +45,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends libmagickwand-d
   export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS" && \
   docker-php-ext-install imagick
 
-# Install composer
-RUN curl --silent https://getcomposer.org/composer.phar -o /usr/local/bin/composer && chmod 755 /usr/local/bin/composer
+# Install Composer
+RUN curl --silent https://getcomposer.org/composer.phar -o /usr/local/bin/composer && \
+  chmod 755 /usr/local/bin/composer
+
+# Install Yarn
+RUN apt-get update -qq && \
+  apt-get install -yqq gnupg && \
+  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+  echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+  apt update -qq && \
+  apt install -yqq yarn
 
 # Modify www-data user to uid:gid 1000:1000
 RUN usermod -u 1000 www-data && \
@@ -78,4 +88,7 @@ RUN cat /usr/local/bin/apache2-foreground | \
   mv /tmp/apache2-foreground /usr/local/bin/apache2-foreground
 
 # Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get clean && rm -rf \
+  /tmp/* \
+  /var/lib/apt/lists/* \
+  /var/tmp/*
