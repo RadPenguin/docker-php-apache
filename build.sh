@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e -u
-
 REPO_NAME=radpenguin/php-apache
 BUILD_DATE=$( date +"%Y-%m-%d-%H-%M-%S" )
 VERSION=1.0.0
@@ -12,6 +10,8 @@ if [[ -z "$1" ]]; then
   --build-arg=BUILD_DATE=\"$BUILD_DATE\" \
   --build-arg=VERSION=\"$VERSION\""
 fi
+
+set -e -u
 
 docker build \
   $options \
