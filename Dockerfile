@@ -21,7 +21,7 @@ RUN apt-get update -qq && \
     mariadb-client-10.3 \
     unzip
 
-# Set the timezone                    
+# Set the timezone
 RUN ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
 
 # Configure PHP
@@ -31,6 +31,7 @@ RUN apt-get update -qq && \
  docker-php-ext-install -j$(nproc) \
     bcmath \
     exif \
+    pdo_mysql \
     mysqli \
     zip && \
   pecl install xdebug && \
