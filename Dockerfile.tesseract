@@ -28,6 +28,16 @@ RUN git clone https://github.com/tesseract-ocr/tesseract.git /tmp/tesseract  && 
 RUN mkdir -p ${TESSDATA_PREFIX} || true && \
   curl --silent --location https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata -o ${TESSDATA_PREFIX}/eng.traineddata
 
+RUN apt-get autoremove -yqq \
+  g++ \
+  git \
+  libjpeg62-turbo-dev \
+  libpng-dev \
+  libtiff5-dev \
+  libtool \
+  pkg-config \
+  zlib1g-dev
+
 RUN apt-get clean && \
   rm -rf \
     /tmp/* \
