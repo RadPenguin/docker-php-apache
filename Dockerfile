@@ -11,7 +11,8 @@ ENV TZ="America/Edmonton"
 
 ENV APACHE_DOCUMENT_ROOT /var/www/html
 ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV IMAGEMAGICK_VERSION=3.4.3
+ENV IMAGEMAGICK_VERSION=3.4.4
+ENV TESSDATA_PREFIX=/tesseract
 
 # Install dependencies.
 RUN apt-get update -qq && \
@@ -23,6 +24,31 @@ RUN apt-get update -qq && \
 
 # Set the timezone
 RUN ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
+
+# Compile Tesseract
+RUN apt -qq update && \
+  apt install -yqq \
+    autoconf \
+    automake \
+    g++ \
+    libjpeg62-turbo-dev \
+    libleptonica-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libtool \
+    pkg-config \
+    zlib1g-dev
+
+RUN git clone https://github.com/tesseract-ocr/tesseract.git /tmp/tesseract  && \
+  cd /tmp/tesseract && \
+  ./autogen.sh && \
+  ./configure && \
+  make -j$( nproc) && \
+  make install && \
+  ldconfig
+
+RUN mkdir -p ${TESSDATA_PREFIX} || true && \
+  curl --silent --location https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata -o ${TESSDATA_PREFIX}/eng.traineddata
 
 # Configure PHP
 RUN apt-get update -qq && \
@@ -40,9 +66,18 @@ RUN apt-get update -qq && \
 RUN mv /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 ADD ./php.ini /usr/local/etc/php/conf.d/custom.ini
 
-# Install ImageMagick
-RUN apt-get update && apt-get install -y --no-install-recommends libmagickwand-dev imagemagick && \
-  mkdir -p /usr/src/php/ext/imagick && \
+# Compile Imagemagick
+RUN  apt update && \
+  apt install -yqq libzip4 && \
+  git clone https://github.com/ImageMagick/ImageMagick.git /tmp/imagemagick && \
+  cd /tmp/imagemagick && \
+  ./configure --enable-openmp && \
+  make -j$( nproc) && \
+  make install && \
+  ldconfig /usr/local/lib
+
+# Install ImageMagick PHP extension.
+RUN mkdir -p /usr/src/php/ext/imagick && \
   curl --location https://pecl.php.net/get/imagick-${IMAGEMAGICK_VERSION}.tgz | tar zx --strip-components=1 -C /usr/src/php/ext/imagick && \
   export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS" && \
   docker-php-ext-install imagick
@@ -88,6 +123,16 @@ RUN cat /usr/local/bin/apache2-foreground | \
   sed -e 's/^\(exec .*\)$/\/usr\/local\/bin\/startup.sh\n\n\1/' > /tmp/apache2-foreground && \
   chmod 755 /tmp/apache2-foreground && \
   mv /tmp/apache2-foreground /usr/local/bin/apache2-foreground
+
+# Clean up packages.
+RUN apt-get autoremove -yqq \
+  g++ \
+  libjpeg62-turbo-dev \
+  libpng-dev \
+  libtiff5-dev \
+  libtool \
+  pkg-config \
+  zlib1g-dev
 
 # Clean up
 RUN apt-get clean && rm -rf \
