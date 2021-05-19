@@ -1,5 +1,10 @@
 #!/bin/bash
 
-# Setup the xdebug remote host.
+# Setup xdebug.
 XDEBUG_REMOTE_HOST=$( /sbin/ip route | awk '/default/ { print $3 }' )
-echo "xdebug.remote_host=${XDEBUG_REMOTE_HOST}" | tee -a  /usr/local/etc/php/conf.d/custom.ini
+
+tee /usr/local/etc/php/conf.d/99-radpenguin.ini << EOF
+xdebug.client_host=${XDEBUG_REMOTE_HOST}
+xdebug.mode=${XDEBUG_MODE:-off}
+EOF
+
