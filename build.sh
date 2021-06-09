@@ -9,7 +9,12 @@ if [[ -z "$1" ]]; then
   options="--no-cache \
   --build-arg=BUILD_DATE=\"$BUILD_DATE\" \
   --build-arg=VERSION=\"$VERSION\""
+
+  echo "Building release version"
+else
+  echo "Building non-release version"
 fi
+sleep 2
 
 set -e -u
 

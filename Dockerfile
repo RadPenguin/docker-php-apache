@@ -25,6 +25,9 @@ RUN apt-get update -qq && \
 # Set the timezone
 RUN ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
 
+# Update the default .bashrc.
+RUN echo "alias ll='ls -al --color'" >> /etc/bash.bashrc
+
 # Compile Tesseract
 RUN apt -qq update && \
   apt install -yqq \
@@ -57,8 +60,10 @@ RUN apt-get update -qq && \
  docker-php-ext-install -j$(nproc) \
     bcmath \
     exif \
-    pdo_mysql \
+    gettext \
     mysqli \
+    opcache \
+    pdo_mysql \
     zip && \
   pecl install xdebug && \
   docker-php-ext-enable xdebug
@@ -66,9 +71,22 @@ RUN apt-get update -qq && \
 RUN mv /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 ADD ./php.ini /usr/local/etc/php/conf.d/custom.ini
 
+# Install mcrypt.
+RUN apt-get -qq update && apt-get install -yqq --no-install-recommends libltdl7 libmcrypt-dev && \
+  yes '' | pecl install mcrypt && \
+  docker-php-ext-enable mcrypt
+
+# Install GD.
+RUN apt-get -qq update && apt-get install -yqq --no-install-recommends \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev && \
+  docker-php-ext-configure gd && \
+  docker-php-ext-install -j$(nproc) gd
+
 # Compile Imagemagick
-RUN  apt update && \
-  apt install -yqq libzip4 && \
+RUN apt update && \
+  apt install -yqq libzip4 libfreetype6 && \
   git clone https://github.com/ImageMagick/ImageMagick.git /tmp/imagemagick && \
   cd /tmp/imagemagick && \
   ./configure --enable-openmp && \
@@ -78,7 +96,7 @@ RUN  apt update && \
 
 # Install ImageMagick PHP extension.
 RUN mkdir -p /usr/src/php/ext/imagick && \
-  curl --location https://pecl.php.net/get/imagick-${IMAGEMAGICK_VERSION}.tgz | tar zx --strip-components=1 -C /usr/src/php/ext/imagick && \
+  curl --silent --location https://pecl.php.net/get/imagick-${IMAGEMAGICK_VERSION}.tgz | tar zx --strip-components=1 -C /usr/src/php/ext/imagick && \
   export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS" && \
   docker-php-ext-install imagick
 
@@ -89,10 +107,15 @@ RUN curl --silent https://getcomposer.org/composer.phar -o /usr/local/bin/compos
 # Install Yarn
 RUN apt-get update -qq && \
   apt-get install -yqq gnupg && \
-  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+  curl --silent https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
   echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
   apt update -qq && \
   apt install -yqq yarn
+
+# Install wp-cli.
+RUN curl --silent https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar --output /usr/local/bin/wp && \
+  chmod 775 /usr/local/bin/wp && \
+  echo "alias wp='/usr/local/bin/wp --allow-root'" >> /etc/bash.bashrc
 
 # Modify www-data user to uid:gid 1000:1000
 RUN usermod -u 1000 www-data && \
@@ -107,8 +130,10 @@ RUN usermod -g 1000 www-data
 RUN a2enmod \
     actions \
     expires\
+    filter \
     headers \
     macro \
+    request \
     rewrite
 
 # Set the Apache path
@@ -137,5 +162,6 @@ RUN apt-get autoremove -yqq \
 # Clean up
 RUN apt-get clean && rm -rf \
   /tmp/* \
+  /usr/src/* \
   /var/lib/apt/lists/* \
   /var/tmp/*
