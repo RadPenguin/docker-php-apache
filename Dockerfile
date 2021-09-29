@@ -12,7 +12,7 @@ ENV TZ="America/Edmonton"
 ENV APACHE_DOCUMENT_ROOT /var/www/html
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV IMAGEMAGICK_VERSION=3.4.4
-ENV TESSDATA_PREFIX=/tesseract
+ENV NODE_VERSION 14.18.0
 
 # Install dependencies.
 RUN apt-get update -qq && \
@@ -27,31 +27,6 @@ RUN ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
 
 # Update the default .bashrc.
 RUN echo "alias ll='ls -al --color'" >> /etc/bash.bashrc
-
-# Compile Tesseract
-RUN apt -qq update && \
-  apt install -yqq \
-    autoconf \
-    automake \
-    g++ \
-    libjpeg62-turbo-dev \
-    libleptonica-dev \
-    libpng-dev \
-    libtiff5-dev \
-    libtool \
-    pkg-config \
-    zlib1g-dev
-
-RUN git clone https://github.com/tesseract-ocr/tesseract.git /tmp/tesseract  && \
-  cd /tmp/tesseract && \
-  ./autogen.sh && \
-  ./configure && \
-  make -j$( nproc) && \
-  make install && \
-  ldconfig
-
-RUN mkdir -p ${TESSDATA_PREFIX} || true && \
-  curl --silent --location https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata -o ${TESSDATA_PREFIX}/eng.traineddata
 
 # Configure PHP
 RUN apt-get update -qq && \
@@ -80,18 +55,20 @@ RUN apt-get -qq update && apt-get install -yqq --no-install-recommends libltdl7 
 # Install GD.
 RUN apt-get -qq update && apt-get install -yqq --no-install-recommends \
         libfreetype6-dev \
+        libjpeg62-turbo \
         libjpeg62-turbo-dev \
         libpng-dev && \
   docker-php-ext-configure gd && \
   docker-php-ext-install -j$(nproc) gd
 
 # Compile Imagemagick
-RUN apt update && \
+RUN apt update && apt-get install -yqq --no-install-recommends \
+        libjpeg62-turbo && \
   apt install -yqq libzip4 libfreetype6 && \
   git clone https://github.com/ImageMagick/ImageMagick.git /tmp/imagemagick && \
   cd /tmp/imagemagick && \
   ./configure --enable-openmp && \
-  make -j$( nproc) && \
+  make -j$(nproc) && \
   make install && \
   ldconfig /usr/local/lib
 
@@ -117,6 +94,16 @@ RUN apt-get update -qq && \
 RUN curl --silent https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar --output /usr/local/bin/wp && \
   chmod 775 /usr/local/bin/wp && \
   echo "alias wp='/usr/local/bin/wp --allow-root'" >> /etc/bash.bashrc
+
+# Install Node and NPM.
+RUN mkdir -p /usr/local/bin/node && \
+  cd /usr/local/bin/node && \
+  curl --silent https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz | tar Jx --strip-components=1
+RUN echo "export PATH=\$PATH:/usr/local/bin/node/bin" >> /etc/bash.bashrc
+
+# Install Symfony CLI.
+RUN curl -sS https://get.symfony.com/cli/installer | bash && \
+  echo "export PATH=\$PATH:\$HOME/.symfony/bin" >> /etc/bash.bashrc
 
 # Modify www-data user to uid:gid 1000:1000
 RUN usermod -u 1000 www-data && \
@@ -154,11 +141,7 @@ RUN cat /usr/local/bin/apache2-foreground | \
 RUN apt-get autoremove -yqq \
   g++ \
   libjpeg62-turbo-dev \
-  libpng-dev \
-  libtiff5-dev \
-  libtool \
-  pkg-config \
-  zlib1g-dev
+  libpng-dev
 
 # Clean up
 RUN apt-get clean && rm -rf \
