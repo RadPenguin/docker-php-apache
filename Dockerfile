@@ -10,8 +10,9 @@ ENV LC_ALL C.UTF-8
 ENV TZ="America/Edmonton"
 
 ENV APACHE_DOCUMENT_ROOT /var/www/html
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV IMAGEMAGICK_VERSION=3.4.4
+ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_MEMORY_LIMIT -1
+ENV IMAGEMAGICK_VERSION 3.4.4
 ENV NODE_VERSION 14.18.0
 
 # Install dependencies.
@@ -45,7 +46,7 @@ RUN apt-get update -qq && \
 
 RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 RUN mkdir -p /var/www/html/.xdebug
-ADD ./php.ini /usr/local/etc/php/conf.d/custom.ini
+ADD ./php.ini /usr/local/etc/php/conf.d/00-custom.ini
 
 # Install mcrypt.
 RUN apt-get -qq update && apt-get install -yqq --no-install-recommends libltdl7 libmcrypt-dev && \
