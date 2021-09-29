@@ -11,8 +11,8 @@ opcache.revalidate_freq = 0
 opcache.validate_timestamps = 1
 xdebug.mode = $XDEBUG_MODE
 EOF
-
-  # Ensure the xdebug folder is writable.
-  mkdir -p /var/www/html/.xdebug/
-  chown -R www-data:www-data /var/www/html/.xdebug/
 fi
+
+# Ensure the xdebug folder exists and is writable.
+mkdir -p /var/www/.xdebug/
+chown -R www-data:www-data /var/www/.xdebug/
