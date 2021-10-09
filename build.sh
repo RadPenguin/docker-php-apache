@@ -3,6 +3,7 @@
 REPO_NAME=radpenguin/php-apache
 BUILD_DATE=$(date +"%Y-%m-%d-%H-%M-%S")
 VERSION=1.0.0
+scriptStartTime=$( date +%s )
 
 options=
 isReleaseVersion=0
@@ -28,3 +29,6 @@ docker build \
 if [[ $isReleaseVersion -eq 1 ]]; then
   docker push $REPO_NAME
 fi
+
+scriptEndTime=$( date +%s )
+echo "Completed build in "$((scriptEndTime-$scriptStartTime))" seconds"
