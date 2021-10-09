@@ -97,6 +97,7 @@ RUN curl --silent https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/
   echo "alias wp='/usr/local/bin/wp --allow-root'" >> /etc/bash.bashrc
 
 # Install Node and NPM.
+RUN apt-get autoremove -yqq nodejs
 RUN mkdir -p /usr/local/bin/node && \
   cd /usr/local/bin/node && \
   curl --silent https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz | tar Jx --strip-components=1
