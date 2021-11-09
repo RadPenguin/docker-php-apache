@@ -45,7 +45,7 @@ RUN apt-get update -qq && \
   docker-php-ext-enable xdebug
 
 RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-RUN mkdir -p /var/www/html/.xdebug
+RUN mkdir -p /var/www/.xdebug
 ADD ./php.ini /usr/local/etc/php/conf.d/00-custom.ini
 
 # Install mcrypt.
