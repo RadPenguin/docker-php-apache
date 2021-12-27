@@ -107,6 +107,11 @@ RUN echo "export PATH=\$PATH:/usr/local/bin/node/bin" >> /etc/bash.bashrc
 RUN curl -sS https://get.symfony.com/cli/installer | bash && \
   echo "export PATH=\$PATH:\$HOME/.symfony/bin" >> /etc/bash.bashrc
 
+# Install foreman
+RUN apt-get update && \
+    apt-get install -yqq ruby && \
+    gem install foreman
+
 # Modify www-data user to uid:gid 1000:1000
 RUN usermod -u 1000 www-data && \
     groupmod -g 1000 www-data
