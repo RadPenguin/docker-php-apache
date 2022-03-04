@@ -12,8 +12,8 @@ ENV TZ="America/Edmonton"
 ENV APACHE_DOCUMENT_ROOT /var/www/html
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_MEMORY_LIMIT -1
-ENV IMAGEMAGICK_VERSION 3.4.4
-ENV NODE_VERSION 14.18.0
+ENV IMAGEMAGICK_VERSION 3.7.0
+ENV NODE_VERSION 16.14.0
 
 # Install dependencies.
 RUN apt-get update -qq && \
@@ -47,11 +47,6 @@ RUN apt-get update -qq && \
 RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 RUN mkdir -p /var/www/.xdebug
 ADD ./php.ini /usr/local/etc/php/conf.d/00-custom.ini
-
-# Install mcrypt.
-RUN apt-get -qq update && apt-get install -yqq --no-install-recommends libltdl7 libmcrypt-dev && \
-  yes '' | pecl install mcrypt && \
-  docker-php-ext-enable mcrypt
 
 # Install GD.
 RUN apt-get -qq update && apt-get install -yqq --no-install-recommends \
