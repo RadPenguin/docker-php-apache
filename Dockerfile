@@ -20,7 +20,9 @@ RUN apt-get update -qq && \
   apt-get install -yqq \
     curl \
     git \
+    jq \
     mariadb-client \
+    rsync \
     unzip
 
 # Set the timezone
