@@ -5,6 +5,7 @@ scriptStartTime=$( date +%s )
 
 set -e -u
 
+docker login
 docker build --tag=$REPO_NAME .
 docker push $REPO_NAME
 
