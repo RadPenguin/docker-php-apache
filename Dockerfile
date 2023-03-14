@@ -93,6 +93,10 @@ RUN curl --silent https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/
   chmod 775 /usr/local/bin/wp && \
   echo "alias wp='/usr/local/bin/wp --allow-root'" >> /etc/bash.bashrc
 
+# Install Drush.
+RUN curl --silent https://github.com/drush-ops/drush-launcher/releases/download/0.4.2/drush.phar  --output /usr/local/bin/drush && \
+  chmod 775 /usr/local/bin/drush
+
 # Install Node and NPM.
 RUN apt-get autoremove -yqq nodejs
 RUN mkdir -p /usr/local/bin/node && \
