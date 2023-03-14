@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPO_NAME=radpenguin/php-apache
+REPO_NAME=taeram/php-apache
 scriptStartTime=$( date +%s )
 
 set -e -u
