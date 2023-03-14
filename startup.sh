@@ -14,5 +14,8 @@ EOF
 fi
 
 # Ensure the xdebug folder exists and is writable.
-mkdir -p /var/www/.xdebug/
-chown -R www-data:www-data /var/www/.xdebug/
+XDEBUG_OUTPUT_DIR=$( php -i | grep xdebug.output_dir | awk '{print $3}' )
+if [[ -n $XDEBUG_OUTPUT_DIR ]] && [[ ! -e "$XDEBUG_OUTPUT_DIR" ]]; then
+  mkdir -p "$XDEBUG_OUTPUT_DIR"
+  chown -R www-data:www-data "$XDEBUG_OUTPUT_DIR"
+fi
