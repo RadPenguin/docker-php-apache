@@ -1,4 +1,4 @@
-FROM php:8-apache
+FROM php:8.1-apache
 
 ARG BUILD_DATE
 ARG VERSION
@@ -18,12 +18,13 @@ ENV NODE_VERSION 16.14.0
 # Install dependencies.
 RUN apt-get update -qq && \
   apt-get install -yqq \
-    curl \
-    git \
-    jq \
-    mariadb-client \
-    rsync \
-    unzip
+  curl \
+  git \
+  jq \
+  mariadb-client \
+  rsync \
+  wget \
+  unzip
 
 # Set the timezone
 RUN ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
@@ -33,16 +34,15 @@ RUN echo "alias ll='ls -al --color'" >> /etc/bash.bashrc
 
 # Configure PHP
 RUN apt-get update -qq && \
-  apt-get -yqq install \
-    libzip-dev && \
- docker-php-ext-install -j$(nproc) \
-    bcmath \
-    exif \
-    gettext \
-    mysqli \
-    opcache \
-    pdo_mysql \
-    zip && \
+  apt-get -yqq install libzip-dev && \
+  docker-php-ext-install -j$(nproc) \
+  bcmath \
+  exif \
+  gettext \
+  mysqli \
+  opcache \
+  pdo_mysql \
+  zip && \
   pecl install xdebug && \
   docker-php-ext-enable xdebug
 
@@ -52,16 +52,16 @@ ADD ./php.ini /usr/local/etc/php/conf.d/00-custom.ini
 
 # Install GD.
 RUN apt-get -qq update && apt-get install -yqq --no-install-recommends \
-        libfreetype6-dev \
-        libjpeg62-turbo \
-        libjpeg62-turbo-dev \
-        libpng-dev && \
-  docker-php-ext-configure gd && \
+  libfreetype6-dev \
+  libjpeg62-turbo \
+  libjpeg62-turbo-dev \
+  libpng-dev && \
+  docker-php-ext-configure gd --with-freetype --with-jpeg && \
   docker-php-ext-install -j$(nproc) gd
 
 # Compile Imagemagick
 RUN apt update && apt-get install -yqq --no-install-recommends \
-        libjpeg62-turbo && \
+  libjpeg62-turbo && \
   apt install -yqq libzip4 libfreetype6 && \
   git clone https://github.com/ImageMagick/ImageMagick.git /tmp/imagemagick && \
   cd /tmp/imagemagick && \
@@ -106,12 +106,12 @@ RUN curl -sS https://get.symfony.com/cli/installer | bash && \
 
 # Install foreman
 RUN apt-get update && \
-    apt-get install -yqq ruby && \
-    gem install foreman
+  apt-get install -yqq ruby && \
+  gem install foreman
 
 # Modify www-data user to uid:gid 1000:1000
 RUN usermod -u 1000 www-data && \
-    groupmod -g 1000 www-data
+  groupmod -g 1000 www-data
 RUN find /run -user 33 -exec chown -h 1000 {} \;
 RUN find /var -user 33 -exec chown -h 1000 {} \;
 RUN find /run -group 33 -exec chgrp -h 1000 {} \;
@@ -120,13 +120,13 @@ RUN usermod -g 1000 www-data
 
 # Enable apache modules
 RUN a2enmod \
-    actions \
-    expires\
-    filter \
-    headers \
-    macro \
-    request \
-    rewrite
+  actions \
+  expires\
+  filter \
+  headers \
+  macro \
+  request \
+  rewrite
 
 # Set the Apache path
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
