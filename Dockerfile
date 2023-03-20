@@ -1,7 +1,9 @@
-FROM php:8.1-apache
+ARG FROM_IMAGE
+FROM $FROM_IMAGE
 
 ARG BUILD_DATE
 ARG VERSION
+ARG XDEBUG_VERSION=""
 LABEL build_version="RadPenguin version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 
 ENV LANG en_US.UTF-8
@@ -43,7 +45,7 @@ RUN apt-get update -qq && \
   opcache \
   pdo_mysql \
   zip && \
-  pecl install xdebug && \
+  pecl install xdebug${XDEBUG_VERSION} && \
   docker-php-ext-enable xdebug
 
 RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
