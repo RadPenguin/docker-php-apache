@@ -21,12 +21,15 @@ ENV NODE_VERSION 18.17.1
 RUN apt-get update -qq && \
   apt-get install -yqq \
   curl \
+  ffmpeg \
   git \
   jq \
   mariadb-client \
+  rename \
   rsync \
-  wget \
-  unzip
+  unzip \
+  webp \
+  wget
 
 # Set the timezone
 RUN ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
