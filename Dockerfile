@@ -153,7 +153,10 @@ RUN a2enmod \
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Modifty Apache to run our script before startup
+# Allow Apache to log to actual files by removing the current symlinks.
+RUN rm -f /var/log/apache2/* 
+
+# Modify Apache to run our script before startup
 RUN apt-get -qq update && \
   apt-get install -yqq iproute2
 ADD ./startup.sh /usr/local/bin/startup.sh
