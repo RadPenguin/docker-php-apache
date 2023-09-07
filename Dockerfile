@@ -125,6 +125,11 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o 
   apt update -qq && \
   apt install -yqq gh
 
+# Install the AWS CLI.
+RUN curl --silent "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/aws.zip" && \
+  unzip "/tmp/aws.zip" -d "/tmp/" && \
+  /tmp/aws/install
+
 # Modify www-data user to uid:gid 1000:1000
 RUN usermod -u 1000 www-data && \
   groupmod -g 1000 www-data
