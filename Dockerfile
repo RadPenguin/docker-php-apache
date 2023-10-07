@@ -65,12 +65,14 @@ RUN apt-get -qq update && apt-get install -yqq --no-install-recommends \
   docker-php-ext-install -j$(nproc) gd
 
 # Compile Imagemagick
-RUN apt update && apt-get install -yqq --no-install-recommends \
-  libjpeg62-turbo && \
-  apt install -yqq libzip4 libfreetype6 && \
+RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
+  libfreetype6 \
+  libjpeg62-turbo \
+  libwebp-dev  \
+  libzip4 && \
   git clone https://github.com/ImageMagick/ImageMagick.git /tmp/imagemagick && \
   cd /tmp/imagemagick && \
-  ./configure --enable-openmp && \
+  ./configure --enable-openmp --with-webp=yes && \
   make -j$(nproc) && \
   make install && \
   ldconfig /usr/local/lib
@@ -114,8 +116,8 @@ RUN apt-get update && \
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /usr/share/keyrings/githubcli-archive-keyring.gpg && \
   chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
-  apt update -qq && \
-  apt install -yqq gh
+  apt-get update -qq && \
+  apt-get install -yqq gh
 
 # Install the AWS CLI.
 RUN curl --silent "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/aws.zip" && \
