@@ -85,14 +85,6 @@ RUN mkdir -p /usr/src/php/ext/imagick && \
 RUN curl --silent https://getcomposer.org/composer.phar -o /usr/local/bin/composer && \
   chmod 755 /usr/local/bin/composer
 
-# Install Yarn
-RUN apt-get update -qq && \
-  apt-get install -yqq gnupg && \
-  curl --silent https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-  echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-  apt update -qq && \
-  apt install -yqq yarn
-
 # Install wp-cli.
 RUN curl --silent https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar --output /usr/local/bin/wp && \
   chmod 775 /usr/local/bin/wp && \
