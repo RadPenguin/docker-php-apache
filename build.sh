@@ -18,6 +18,7 @@ set -e -u
 
 docker login
 docker build \
+  --cache-from $REPO_NAME:$IMAGE_TAG \
   --build-arg FROM_IMAGE="$FROM_IMAGE" \
   --build-arg XDEBUG_VERSION="$XDEBUG_VERSION" \
   --tag=$REPO_NAME:$IMAGE_TAG \
